@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common'
+import { Injectable, NotFoundException, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
 import { UsersRepository } from './users.repository'
 import { User } from './schemas/user.schema'
@@ -35,11 +35,11 @@ export class UsersService {
   async validateUser(email: string, password: string) {
     const user = await this.usersRepository.findOne({ email })
     if (!user) {
-      throw new UnauthorizedException('Credentials are not valid.')
+      throw new NotFoundException('Email not found.')
     }
     const passwordIsValid = await bcrypt.compare(password, user.password)
     if (!passwordIsValid) {
-      throw new UnauthorizedException('Credentials are not valid.')
+      throw new UnauthorizedException('Email or password is incorrect.')
     }
     return user
   }

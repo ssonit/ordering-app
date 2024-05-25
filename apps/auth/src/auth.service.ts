@@ -40,6 +40,9 @@ export class AuthService {
   }
 
   getUser(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Id is not valid')
+    }
     const user = this.usersService.getUser({ _id: new Types.ObjectId(id) })
     if (!user) {
       throw new NotFoundException('User not found')

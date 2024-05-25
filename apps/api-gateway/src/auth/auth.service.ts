@@ -9,11 +9,17 @@ export class AuthService {
   constructor(@Inject(AUTH_SERVICE) private readonly authClient: ClientKafka) {}
 
   async login(data: CreateUserDto) {
-    const response = this.authClient.send('login', JSON.stringify(data))
-    const result = await lastValueFrom(response)
-    return {
-      data: result,
-      message: 'Login successfully'
+    try {
+      const response = this.authClient.send('login', JSON.stringify(data))
+      const result = await lastValueFrom(response)
+
+      if (result.error) {
+        return NewCustomErrorResponse(result.error)
+      }
+
+      return NewFullCustomResponse(result.data, null, 'Login successfully')
+    } catch (error) {
+      return NewFullCustomResponse(null, error, 'Error client kafka')
     }
   }
 
@@ -23,21 +29,29 @@ export class AuthService {
       const result = await lastValueFrom(response)
 
       if (result.error) {
-        return NewCustomErrorResponse(null, result.error)
+        return NewCustomErrorResponse(result.error)
       }
 
-      return NewFullCustomResponse(result, null, 'Register successfully')
+      return NewFullCustomResponse(result.data, null, 'Register successfully')
     } catch (error) {
       return NewFullCustomResponse(null, error, 'Error client kafka')
     }
   }
 
   async getUser(id: string) {
-    const response = this.authClient.send('get_user', JSON.stringify({ id }))
-    const result = await lastValueFrom(response)
-    return {
-      data: result,
-      message: 'Get user successfully'
+    try {
+      const response = this.authClient.send('get_user', JSON.stringify({ id }))
+      const result = await lastValueFrom(response)
+
+      console.log(result, 'result')
+
+      if (result.error) {
+        return NewCustomErrorResponse(result.error)
+      }
+
+      return NewFullCustomResponse(result.data, null, 'Get user successfully')
+    } catch (error) {
+      return NewFullCustomResponse(null, error, 'Error client kafka')
     }
   }
 }
