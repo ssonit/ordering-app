@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
-import { PaymentService } from './payment.service';
+import { Controller, Get } from '@nestjs/common'
+import { PaymentService } from './payment.service'
+import { EventPattern, Payload } from '@nestjs/microservices'
 
 @Controller()
 export class PaymentController {
@@ -7,6 +8,11 @@ export class PaymentController {
 
   @Get()
   getHello(): string {
-    return this.paymentService.getHello();
+    return this.paymentService.getHello()
+  }
+
+  @EventPattern('created_payment')
+  async handlePaymentCreated(@Payload() data: any) {
+    console.log(data)
   }
 }
