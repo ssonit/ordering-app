@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common'
 import { PaymentController } from './payment.controller'
 import { PaymentService } from './payment.service'
 import { KafkaModule } from '@app/common'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import Stripe from 'stripe'
 
 @Module({
   imports: [
@@ -12,6 +13,16 @@ import { ConfigModule } from '@nestjs/config'
     KafkaModule
   ],
   controllers: [PaymentController],
-  providers: [PaymentService]
+  providers: [
+    PaymentService,
+    {
+      provide: Stripe,
+      useFactory: (configService: ConfigService) => {
+        const stripe = new Stripe(configService.getOrThrow('STRIPE_SECRET_KEY'), { apiVersion: '2024-04-10' })
+        return stripe
+      },
+      inject: [ConfigService]
+    }
+  ]
 })
 export class PaymentModule {}
