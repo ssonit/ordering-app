@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
-import { OrderService } from './order.service';
+import { Controller, Get } from '@nestjs/common'
+import { OrderService } from './order.service'
+import { EventPattern } from '@nestjs/microservices'
 
 @Controller()
 export class OrderController {
@@ -7,6 +8,11 @@ export class OrderController {
 
   @Get()
   getHello(): string {
-    return this.orderService.getHello();
+    return this.orderService.getHello()
+  }
+
+  @EventPattern('created_order')
+  async handleOrderCreated(data: any) {
+    return this.orderService.handleOrderCreated(data)
   }
 }

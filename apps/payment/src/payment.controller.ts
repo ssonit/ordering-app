@@ -15,10 +15,11 @@ export class PaymentController {
   @MessagePattern('created_payment')
   async handlePaymentCreated(@Payload() data: any) {
     try {
-      const user = {
-        _id: '123'
-      }
-      const result = await this.paymentService.handlePaymentCreated(data, user)
+      const { body, user } = data
+      const result = await this.paymentService.handlePaymentCreated({
+        data: body.product,
+        user
+      })
       return NewFullCustomResponse(result, null, 'Created payment successfully')
     } catch (error) {
       return NewFullCustomResponse(null, error, 'An error occurred')

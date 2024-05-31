@@ -6,11 +6,17 @@ import { ClientKafka } from '@nestjs/microservices'
 export class PaymentService {
   constructor(@Inject(PAYMENT_SERVICE) private readonly paymentClient: ClientKafka) {}
 
-  async makePayment() {
-    return this.paymentClient.send('created_payment', JSON.stringify({ id: '123' }))
+  async makePayment(body: any, user: any) {
+    return this.paymentClient.send(
+      'created_payment',
+      JSON.stringify({
+        body,
+        user
+      })
+    )
   }
 
-  async stripeWebhook(body: any, headers: any) {
+  stripeWebhook(body: any, headers: any) {
     this.paymentClient.emit(
       'stripe_webhook',
       JSON.stringify({

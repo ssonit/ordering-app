@@ -1,7 +1,19 @@
-import { Body, Controller, Headers, HttpCode, HttpStatus, Inject, OnModuleInit, Post } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  OnModuleInit,
+  Post,
+  Req,
+  UseGuards
+} from '@nestjs/common'
 import { PaymentService } from './payment.service'
 import { PAYMENT_SERVICE } from '@app/common/constants/services'
 import { ClientKafka } from '@nestjs/microservices'
+import { JwtAuthGuard } from '@app/common'
 
 @Controller('payment')
 export class PaymentController implements OnModuleInit {
@@ -12,8 +24,9 @@ export class PaymentController implements OnModuleInit {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  makePayment() {
-    return this.paymentService.makePayment()
+  @UseGuards(JwtAuthGuard)
+  makePayment(@Body() body: any, @Req() req: any) {
+    return this.paymentService.makePayment(body, req.user)
   }
 
   @Post('stripe/webhook')

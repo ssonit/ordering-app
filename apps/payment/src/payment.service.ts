@@ -1,40 +1,50 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import Stripe from 'stripe'
+import { PaymentRepository } from './payment.repository'
+
+interface Product {
+  name: string
+  description: string
+  images: string[]
+  price: number
+  quantity: number
+}
 
 @Injectable()
 export class PaymentService {
   constructor(
     private readonly configService: ConfigService,
-    private readonly stripe: Stripe
+    private stripe: Stripe,
+    private paymentRepository: PaymentRepository
   ) {}
 
   getHello(): string {
     return 'Hello World!'
   }
 
-  async handlePaymentCreated(data: any, user: any) {
-    console.log({ data })
+  async handlePaymentCreated({ data, user }: { data: Product[]; user: any }) {
     try {
+      const line_items = data.map((item: Product) => ({
+        price_data: {
+          currency: 'VND',
+          product_data: {
+            name: item.name,
+            description: item.description,
+            images: item.images
+          },
+          unit_amount: item.price
+        },
+        quantity: item.quantity
+      }))
+
       const session = await this.stripe.checkout.sessions.create({
         success_url: 'https://example.com/success',
         cancel_url: 'https://example.com/cancel',
         payment_method_types: ['card'],
         mode: 'payment',
         billing_address_collection: 'auto',
-        line_items: [
-          {
-            price_data: {
-              currency: 'USD',
-              product_data: {
-                name: 'T-shirt',
-                description: 'Comfortable cotton t-shirt'
-              },
-              unit_amount: 10_000
-            },
-            quantity: 1
-          }
-        ],
+        line_items,
         metadata: {
           userId: user._id
         }
@@ -49,21 +59,41 @@ export class PaymentService {
 
   async stripeWebhook(body: any, headers: any) {
     const signature = headers['stripe-signature'] as string
-    console.log(body, signature)
-    const event = this.stripe.webhooks.constructEvent(
-      body,
-      signature,
-      this.configService.getOrThrow('STRIPE_WEBHOOK_SECRET')
-    )
+    const webhookSecret = this.configService.getOrThrow('STRIPE_WEBHOOK_SECRET')
+    let event: Stripe.Event
+    try {
+      event = this.stripe.webhooks.constructEvent(body, signature, webhookSecret)
+
+      console.log(event, 'event')
+    } catch (error) {
+      throw new BadRequestException('Webhook Error')
+    }
+    console.log(signature, 'signature')
 
     const session = event.data.object as Stripe.Checkout.Session
 
     if (event.type === 'checkout.session.completed') {
-      console.log(session)
+      const info = await this.stripe.checkout.sessions.retrieve(session.id)
+      console.log(info, 'info')
+
+      await this.createPayment({
+        paymentId: session.id,
+        amount: info.amount_total
+      })
+
       // Create payment database
       // Create order database
     }
+  }
 
-    return
+  async createPayment(body: any) {
+    const date = new Date()
+    await this.paymentRepository.create({
+      paymentId: body.paymentId,
+      amount: body.amount,
+      status: 'success',
+      currency: 'VND',
+      createdPaymentAt: date
+    })
   }
 }
