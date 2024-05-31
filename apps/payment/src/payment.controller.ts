@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common'
 import { PaymentService } from './payment.service'
-import { MessagePattern, Payload } from '@nestjs/microservices'
-import { NewResponseError, NewResponseSuccess } from '@app/common'
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices'
+import { NewFullCustomResponse } from '@app/common'
 
 @Controller()
 export class PaymentController {
@@ -15,10 +15,22 @@ export class PaymentController {
   @MessagePattern('created_payment')
   async handlePaymentCreated(@Payload() data: any) {
     try {
-      const result = await this.paymentService.handlePaymentCreated(data)
-      return NewResponseSuccess(result)
+      const user = {
+        _id: '123'
+      }
+      const result = await this.paymentService.handlePaymentCreated(data, user)
+      return NewFullCustomResponse(result, null, 'Created payment successfully')
     } catch (error) {
-      return NewResponseError(error)
+      return NewFullCustomResponse(null, error, 'An error occurred')
+    }
+  }
+
+  @EventPattern('stripe_webhook')
+  async stripeWebhook(@Payload() data: any) {
+    try {
+      await this.paymentService.stripeWebhook(data.body, data.headers)
+    } catch (error) {
+      return NewFullCustomResponse(null, error, 'An error occurred')
     }
   }
 }

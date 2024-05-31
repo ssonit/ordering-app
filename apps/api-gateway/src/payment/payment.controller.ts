@@ -1,4 +1,4 @@
-import { Controller, HttpCode, HttpStatus, Inject, OnModuleInit, Post } from '@nestjs/common'
+import { Body, Controller, Headers, HttpCode, HttpStatus, Inject, OnModuleInit, Post } from '@nestjs/common'
 import { PaymentService } from './payment.service'
 import { PAYMENT_SERVICE } from '@app/common/constants/services'
 import { ClientKafka } from '@nestjs/microservices'
@@ -14,6 +14,12 @@ export class PaymentController implements OnModuleInit {
   @HttpCode(HttpStatus.CREATED)
   makePayment() {
     return this.paymentService.makePayment()
+  }
+
+  @Post('stripe/webhook')
+  @HttpCode(HttpStatus.OK)
+  stripeWebhook(@Body() body: any, @Headers() headers: any) {
+    return this.paymentService.stripeWebhook(body, headers)
   }
 
   async onModuleInit() {

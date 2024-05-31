@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { MessagePattern, Payload } from '@nestjs/microservices'
-import { CreateUserDto, CurrentUser, NewResponseError, NewResponseSuccess } from '@app/common'
+import { CreateUserDto, CurrentUser, NewFullCustomResponse } from '@app/common'
 import JwtAuthGuard from './guards/jwt-auth.guard'
 import { User } from './users/schemas/user.schema'
 
@@ -17,16 +17,20 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @MessagePattern('validate_user')
   async validateUser(@CurrentUser() user: User) {
-    return user
+    try {
+      return user
+    } catch (error) {
+      return error
+    }
   }
 
   @MessagePattern('register')
   async handleUserCreate(@Payload() data: CreateUserDto) {
     try {
       const result = await this.authService.createUser(data)
-      return NewResponseSuccess(result)
+      return NewFullCustomResponse(result, null, 'Register successfully')
     } catch (error) {
-      return NewResponseError(error)
+      return NewFullCustomResponse(null, error, 'An error occurred')
     }
   }
 
@@ -34,9 +38,9 @@ export class AuthController {
   async handleLogin(@Payload() data: CreateUserDto) {
     try {
       const result = await this.authService.login(data)
-      return NewResponseSuccess(result)
+      return NewFullCustomResponse(result, null, 'Login successfully')
     } catch (error) {
-      return NewResponseError(error)
+      return NewFullCustomResponse(null, error, 'An error occurred')
     }
   }
 
@@ -44,9 +48,9 @@ export class AuthController {
   async handleGetUser(@Payload() data: { id: string }) {
     try {
       const result = await this.authService.getUser(data.id)
-      return NewResponseSuccess(result)
+      return NewFullCustomResponse(result, null, 'Get user successfully')
     } catch (error) {
-      return NewResponseError(error)
+      return NewFullCustomResponse(null, error, 'An error occurred')
     }
   }
 }

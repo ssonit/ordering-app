@@ -18,7 +18,10 @@ import Stripe from 'stripe'
     {
       provide: Stripe,
       useFactory: (configService: ConfigService) => {
-        const stripe = new Stripe(configService.getOrThrow('STRIPE_SECRET_KEY'), { apiVersion: '2024-04-10' })
+        const stripe = new Stripe(configService.getOrThrow('STRIPE_SECRET_KEY'), {
+          apiVersion: '2024-04-10',
+          typescript: true
+        })
         return stripe
       },
       inject: [ConfigService]
