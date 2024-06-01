@@ -29,7 +29,8 @@ export class PaymentController {
   @EventPattern('stripe_webhook')
   async stripeWebhook(@Payload() data: any) {
     try {
-      await this.paymentService.stripeWebhook(data.body, data.headers)
+      console.log(data)
+      await this.paymentService.stripeWebhook(data.body, data.stripeSignature)
     } catch (error) {
       return NewFullCustomResponse(null, error, 'An error occurred')
     }

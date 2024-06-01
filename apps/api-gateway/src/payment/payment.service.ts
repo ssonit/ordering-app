@@ -16,13 +16,14 @@ export class PaymentService {
     )
   }
 
-  stripeWebhook(body: any, headers: any) {
+  stripeWebhook(body: any, stripeSignature: string) {
     this.paymentClient.emit(
       'stripe_webhook',
       JSON.stringify({
         body,
-        headers
+        stripeSignature
       })
     )
+    return true
   }
 }

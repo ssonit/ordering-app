@@ -57,24 +57,19 @@ export class PaymentService {
     }
   }
 
-  async stripeWebhook(body: any, headers: any) {
-    const signature = headers['stripe-signature'] as string
+  async stripeWebhook(body: Buffer, signature: string) {
     const webhookSecret = this.configService.getOrThrow('STRIPE_WEBHOOK_SECRET')
     let event: Stripe.Event
     try {
-      event = this.stripe.webhooks.constructEvent(body, signature, webhookSecret)
-
-      console.log(event, 'event')
+      event = this.stripe.webhooks.constructEvent(Buffer.from(body), signature, webhookSecret)
     } catch (error) {
       throw new BadRequestException('Webhook Error')
     }
-    console.log(signature, 'signature')
 
     const session = event.data.object as Stripe.Checkout.Session
 
     if (event.type === 'checkout.session.completed') {
       const info = await this.stripe.checkout.sessions.retrieve(session.id)
-      console.log(info, 'info')
 
       await this.createPayment({
         paymentId: session.id,
@@ -84,6 +79,7 @@ export class PaymentService {
       // Create payment database
       // Create order database
     }
+    return true
   }
 
   async createPayment(body: any) {

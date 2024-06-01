@@ -31,8 +31,11 @@ export class PaymentController implements OnModuleInit {
 
   @Post('stripe/webhook')
   @HttpCode(HttpStatus.OK)
-  stripeWebhook(@Body() body: any, @Headers() headers: any) {
-    return this.paymentService.stripeWebhook(body, headers)
+  stripeWebhook(@Req() req: any, @Headers() headers: any) {
+    const body = Buffer.from(req.rawBody)
+    const stripeSignature = headers['stripe-signature'] as string
+
+    return this.paymentService.stripeWebhook(body, stripeSignature)
   }
 
   async onModuleInit() {
