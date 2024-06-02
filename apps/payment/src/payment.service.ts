@@ -1,7 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import Stripe from 'stripe'
 import { PaymentRepository } from './payment.repository'
+import { ORDER_SERVICE } from '@app/common'
+import { ClientKafka } from '@nestjs/microservices'
 
 interface Product {
   name: string
@@ -14,6 +16,7 @@ interface Product {
 @Injectable()
 export class PaymentService {
   constructor(
+    @Inject(ORDER_SERVICE) private readonly orderClient: ClientKafka,
     private readonly configService: ConfigService,
     private stripe: Stripe,
     private paymentRepository: PaymentRepository
@@ -46,13 +49,15 @@ export class PaymentService {
         billing_address_collection: 'auto',
         line_items,
         metadata: {
-          userId: user._id
+          userId: user._id,
+          data: JSON.stringify(data)
         }
       })
       return {
         url: session.url
       }
     } catch (error) {
+      console.log(error, 'error')
       throw new Error(error)
     }
   }
@@ -69,12 +74,24 @@ export class PaymentService {
     const session = event.data.object as Stripe.Checkout.Session
 
     if (event.type === 'checkout.session.completed') {
-      const info = await this.stripe.checkout.sessions.retrieve(session.id)
+      const info = await this.stripe.checkout.sessions.retrieve(session.id, {
+        expand: ['line_items']
+      })
 
       await this.createPayment({
         paymentId: session.id,
-        amount: info.amount_total
+        amount: info.amount_total,
+        currency: info.currency,
+        status: 'success'
       })
+
+      this.orderClient.emit(
+        'created_order',
+        JSON.stringify({
+          userId: info.metadata.userId,
+          product: info.line_items.data
+        })
+      )
 
       // Create payment database
       // Create order database
@@ -83,13 +100,11 @@ export class PaymentService {
   }
 
   async createPayment(body: any) {
-    const date = new Date()
     await this.paymentRepository.create({
       paymentId: body.paymentId,
       amount: body.amount,
-      status: 'success',
-      currency: 'VND',
-      createdPaymentAt: date
+      status: body.status,
+      currency: body.currency
     })
   }
 }

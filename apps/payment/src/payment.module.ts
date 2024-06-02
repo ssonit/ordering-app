@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common'
 import { PaymentController } from './payment.controller'
 import { PaymentService } from './payment.service'
-import { DatabaseModule, KafkaModule } from '@app/common'
+import { DatabaseModule, KafkaModule, ORDER_SERVICE } from '@app/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import Stripe from 'stripe'
 import { PaymentRepository } from './payment.repository'
 import { MongooseModule } from '@nestjs/mongoose'
 import { Payment, PaymentSchema } from './schemas/payment.schema'
+import { ClientsModule, Transport } from '@nestjs/microservices'
 
 @Module({
   imports: [
@@ -15,7 +16,22 @@ import { Payment, PaymentSchema } from './schemas/payment.schema'
     }),
     KafkaModule,
     DatabaseModule,
-    MongooseModule.forFeature([{ name: Payment.name, schema: PaymentSchema }])
+    MongooseModule.forFeature([{ name: Payment.name, schema: PaymentSchema }]),
+    ClientsModule.register([
+      {
+        name: ORDER_SERVICE,
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            clientId: 'order',
+            brokers: ['localhost:9092']
+          },
+          consumer: {
+            groupId: 'order-consumer'
+          }
+        }
+      }
+    ])
   ],
   controllers: [PaymentController],
   providers: [

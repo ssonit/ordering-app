@@ -1,5 +1,5 @@
 import { CreateUserDto } from '@app/common'
-import { AUTH_SERVICE } from '@app/common/constants/services'
+import { AUTH_SERVICE } from '@app/common'
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientKafka } from '@nestjs/microservices'
 

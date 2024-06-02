@@ -14,9 +14,6 @@ export class Payment extends AbstractDocument {
 
   @Prop({ required: true })
   status: string
-
-  @Prop()
-  createdPaymentAt: Date
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment)

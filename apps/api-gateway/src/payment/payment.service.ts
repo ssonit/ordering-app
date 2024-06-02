@@ -1,4 +1,4 @@
-import { PAYMENT_SERVICE } from '@app/common/constants/services'
+import { PAYMENT_SERVICE } from '@app/common'
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientKafka } from '@nestjs/microservices'
 

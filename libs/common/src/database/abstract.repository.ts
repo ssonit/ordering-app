@@ -18,6 +18,15 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     return (await createdDocument.save(options)).toJSON() as unknown as TDocument
   }
 
+  async createMany(documents: Omit<TDocument, '_id'>[], options?: SaveOptions): Promise<TDocument[]> {
+    const documentsWithId = documents.map((document) => ({
+      ...document,
+      _id: new Types.ObjectId()
+    }))
+    const createdDocuments = await this.model.insertMany(documentsWithId, options)
+    return createdDocuments.map((doc) => doc.toJSON() as unknown as TDocument)
+  }
+
   async findOne(filterQuery: FilterQuery<TDocument>) {
     const document = await this.model.findOne(filterQuery, {}, { lean: true })
 

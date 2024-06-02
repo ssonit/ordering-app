@@ -9,6 +9,13 @@ export class OrderService {
   }
 
   async handleOrderCreated(data: any) {
-    await this.orderRepository.create(data)
+    const products = data.product.map((item: any) => ({
+      user: data.userId,
+      product: item.id,
+      quantity: item.quantity,
+      status: 'pending'
+    }))
+
+    await this.orderRepository.createMany(products)
   }
 }

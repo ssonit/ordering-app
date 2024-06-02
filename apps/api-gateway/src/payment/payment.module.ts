@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { PaymentController } from './payment.controller'
 import { PaymentService } from './payment.service'
-import { AUTH_SERVICE, PAYMENT_SERVICE } from '@app/common/constants/services'
+import { AUTH_SERVICE, PAYMENT_SERVICE } from '@app/common'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 
 @Module({

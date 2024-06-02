@@ -7,27 +7,13 @@ export class Order extends AbstractDocument {
   user: string
 
   @Prop({ required: true })
-  product: Product
+  product: string
 
   @Prop({ required: true })
   quantity: number
 
   @Prop({ required: true })
   status: string
-}
-
-class Product {
-  @Prop({ required: true })
-  name: string
-
-  @Prop({ required: true })
-  description: string
-
-  @Prop({ required: true })
-  images: string[]
-
-  @Prop({ required: true })
-  price: number
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order)

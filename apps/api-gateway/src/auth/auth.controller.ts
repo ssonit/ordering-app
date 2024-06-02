@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { ClientKafka } from '@nestjs/microservices'
-import { AUTH_SERVICE } from '@app/common/constants/services'
+import { AUTH_SERVICE } from '@app/common'
 import { CreateUserDto, JwtAuthGuard } from '@app/common'
 
 @Controller('auth')

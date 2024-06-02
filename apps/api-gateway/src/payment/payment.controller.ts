@@ -11,7 +11,7 @@ import {
   UseGuards
 } from '@nestjs/common'
 import { PaymentService } from './payment.service'
-import { PAYMENT_SERVICE } from '@app/common/constants/services'
+import { PAYMENT_SERVICE } from '@app/common'
 import { ClientKafka } from '@nestjs/microservices'
 import { JwtAuthGuard } from '@app/common'
 
