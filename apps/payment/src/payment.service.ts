@@ -92,9 +92,6 @@ export class PaymentService {
           product: info.line_items.data
         })
       )
-
-      // Create payment database
-      // Create order database
     }
     return true
   }
