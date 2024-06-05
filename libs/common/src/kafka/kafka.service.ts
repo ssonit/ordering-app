@@ -16,6 +16,9 @@ export class KafkaService {
         consumer: {
           groupId: consumer
         }
+        // producer: {
+        //   createPartitioner: Partitioners.LegacyPartitioner
+        // }
       }
     }
   }
