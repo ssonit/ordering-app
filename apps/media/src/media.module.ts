@@ -33,7 +33,7 @@ import { S3Client } from '@aws-sdk/client-s3'
       provide: S3Client,
       useFactory: (configService: ConfigService) => {
         const s3Client = new S3Client({
-          region: configService.getOrThrow('AWS_S3_REGION'),
+          region: configService.getOrThrow('AWS_REGION'),
           credentials: {
             accessKeyId: configService.getOrThrow('AWS_ACCESS_KEY'),
             secretAccessKey: configService.getOrThrow('AWS_SECRET_ACCESS_KEY')

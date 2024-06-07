@@ -63,6 +63,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/media/tsconfig.app.json"
       }
+    },
+    "send-mail": {
+      "type": "application",
+      "root": "apps/send-mail",
+      "entryFile": "main",
+      "sourceRoot": "apps/send-mail/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/send-mail/tsconfig.app.json"
+      }
     }
   }
 }

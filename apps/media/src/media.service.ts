@@ -22,7 +22,7 @@ export class MediaService {
   }
 
   private get s3BucketRegion() {
-    return this.configService.getOrThrow('AWS_S3_REGION')
+    return this.configService.getOrThrow('AWS_REGION')
   }
 
   private randomObjectKeyName(name: string) {
